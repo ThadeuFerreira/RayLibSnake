@@ -4,6 +4,7 @@
 #include <iostream>
 #include "snake.hpp"
 #include "food.hpp"
+#include <string>
 
 #pragma once
 using namespace std;
@@ -33,6 +34,7 @@ private:
 	int cellSize;
 	Color color;
 	int** grid;
+	int score = 0;
 	Food* food;
 	Snake* snake;
 
@@ -77,11 +79,19 @@ public:
 	void Update() {
 		//Draw text in the middle of the screen
 		
-		snake->Update(food, width, height);
-		if (snake->colided) {
-			message = "Game Over";
+		SnakeState state = snake->Update(food, width, height);
+		switch (state) {
+		case SnakeState::DEAD:
+			message = "You died!";
 			TraceLog(LOG_INFO, message.c_str());
 			Reset();
+			break;
+		case SnakeState::EATING:
+			this->score += 1;
+			message = "Score: " + to_string(score);
+			break;
+		default:
+			break;
 		}
 		
 	}

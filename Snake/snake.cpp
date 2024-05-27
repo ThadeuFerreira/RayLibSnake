@@ -52,14 +52,20 @@ void Snake::Draw(Vector2 offset, int cellSize) {
 		DrawRectangle(offset.x + body[i].x * cellSize,offset.y + body[i].y * cellSize, cellSize - 1, cellSize - 1, color);
 	}
 }
-void Snake::Move(Food* food, int cellsX, int cells) {
-	this->colided = CheckCollision(cellsX, cells);
+SnakeState Snake::Move(Food* food, int cellsX, int cells) {
+	if (CheckCollision(cellsX, cells)) {
+        colided = true;
+        return DEAD;
+    }
+
+	SnakeState returnState = MOVING;
 	
 	if (CheckFoodCollision(food)) {
 		body.push_front(headPosition);
 		this->color = RED;
 		this->eating = true;
 		bodyLength++;
+        returnState = EATING;
 	}
 
 	Vector2 newHeadPosition = Vector2Add(headPosition, direction);
@@ -68,6 +74,7 @@ void Snake::Move(Food* food, int cellsX, int cells) {
 	if (body.size() > bodyLength) {
 		body.pop_back();
 	}
+    return returnState;
 }
 
 bool Snake::CheckFoodCollision(Food* food) {
@@ -92,7 +99,7 @@ bool Snake::CheckCollision(int cellsX, int cells) {
 
 }
 
-void Snake::Update(Food* food, int cellsX, int cellsY) {
+SnakeState Snake::Update(Food* food, int cellsX, int cellsY) {
 	// Check for input
 	if (IsKeyPressed(KEY_UP) && (direction.x != 0 && direction.y != 1)) {
 		setDirection({ 0, -1 });
@@ -123,8 +130,10 @@ void Snake::Update(Food* food, int cellsX, int cellsY) {
 
 	static float time_s2;
 	time_s2 += GetFrameTime();
+    SnakeState returnState = MOVING;
 	if (time_s2 > 1 / speed) {
-		Move(food, cellsX, cellsY);
+		returnState = Move(food, cellsX, cellsY);
 		time_s2 = 0;
 	}
+    return returnState;
 }
